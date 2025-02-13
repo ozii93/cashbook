@@ -6,22 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
     /**
      * Display the login view.
      */
-    public function create(): Response
+    public function create(): View
     {
-        return Inertia::render('Auth/Login', [
-            'canResetPassword' => Route::has('password.request'),
-            'status' => session('status'),
-        ]);
+        return view('auth.login');
     }
 
     /**
@@ -47,6 +43,20 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
+        $this->clearAllCache();
+
         return redirect('/');
+    }
+    protected function clearAllCache()
+    {
+        Artisan::call('cache:clear');     // Hapus cache aplikasi
+        Artisan::call('config:clear');    // Hapus cache konfigurasi
+        Artisan::call('route:clear');     // Hapus cache routing
+        Artisan::call('view:clear');      // Hapus cache tampilan
+    }
+    protected function authenticated(Request $request, $user)
+    {
+        $menu = $user->getMenuByRole(); // Dapatkan menu berdasarkan role
+        session(['user_menu' => $menu->where('is_active', 1), 'user' => $user->getOriginal()]); // Simpan di session
     }
 }

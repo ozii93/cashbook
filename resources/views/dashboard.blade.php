@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-
 <div class="container-fluid">
     <!-- ============================================================== -->
     <!-- Bread crumb and right sidebar toggle -->
